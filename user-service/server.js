@@ -9,7 +9,13 @@ const app = express();
 
 // Middleware to parse JSON requests
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
+app.use(cors({ 
+  origin: 'https://simpleappbackend-1.onrender.com', 
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
 // Connect to MongoDB
 connectDB();
 
