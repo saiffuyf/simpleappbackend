@@ -10,11 +10,28 @@ const app = express();
 // Middleware to parse JSON requests
 app.use(express.json());
 // app.use(cors());
-app.use(cors({ 
-  origin: 'https://simpleappbackend-1.onrender.com', 
-  methods: ['GET', 'POST'],
+app.use(cors({
+  origin: ['https://simpleapp-i551.onrender.com'], // Add your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
+
+// const allowedOrigins = [
+//   'http://localhost:4200',  // For local development
+//   'https://simpleapp-i551.onrender.com' // Your frontend on Render
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true
+// }));
 
 // Connect to MongoDB
 connectDB();
