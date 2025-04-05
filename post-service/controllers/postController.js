@@ -4,14 +4,18 @@ const multer = require("multer");
 const path = require("path");
 
 // Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
+// **const storage = multer.diskStorage({
+//   destination: "uploads/",
+//   filename: (req, file, cb) => {
+//     cb(null, `${Date.now()}-${file.originalname}`);
+//   }
+// });
 
+const storage = multer.memoryStorage(); // Store image in memory
 const upload = multer({ storage });
+
+
+// **const upload = multer({ storage });
 
 // Validation rules
 const validatePost = [
@@ -21,69 +25,125 @@ const validatePost = [
 ];
 
 // Create a new post
+// **exports.createPost = async (req, res) => {
+//     console.log("🔍 Received Request Body:", req.body);
+//     console.log("📸 Received File:", req.file);
+  
+//     // Validation check
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({ errors: errors.array() });
+//     }
+  
+//     if (!req.file) {
+//       return res.status(400).json({ message: "Image file is required" });
+//     }
+  
+//     const { userId, username, profilePicture, caption } = req.body;
+//     // const imageUrl = `/uploads/${req.file.filename}`; // Store file path ***
+//     const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+  
+//     try {
+//       const newPost = new Post({
+//         userId,
+//         username,
+//         profilePicture,
+//         imageUrl,
+//         caption
+//       });
+  
+//       await newPost.save();
+//       res.status(201).json(newPost);
+//     } catch (error) {
+//       console.error(" Error creating post:", error);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   };
+ 
 exports.createPost = async (req, res) => {
-    console.log("🔍 Received Request Body:", req.body);
-    console.log("📸 Received File:", req.file);
-  
-    // Validation check
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-  
-    if (!req.file) {
-      return res.status(400).json({ message: "Image file is required" });
-    }
-  
-    const { userId, username, profilePicture, caption } = req.body;
-    // const imageUrl = `/uploads/${req.file.filename}`; // Store file path ***
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  console.log("🔍 Received Request Body:", req.body);
+  console.log("📸 Received File:", req.file);
 
-  
-    try {
-      const newPost = new Post({
-        userId,
-        username,
-        profilePicture,
-        imageUrl,
-        caption
-      });
-  
-      await newPost.save();
-      res.status(201).json(newPost);
-    } catch (error) {
-      console.error(" Error creating post:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  };
-  
-// Get all posts ***
-// exports.getAllPosts = async (req, res) => {
-//   try {
-//     const posts = await Post.find().sort({ createdAt: -1 });
-//     res.json(posts);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-exports.getAllPosts = async (req, res) => {
-    try {
-      let posts = await Post.find();
-      
-      // Shuffle posts randomly (Fisher-Yates Algorithm)
-      for (let i = posts.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [posts[i], posts[j]] = [posts[j], posts[i]];
+  if (!req.file) {
+    return res.status(400).json({ message: "Image file is required" });
+  }
+
+  const { userId, username, profilePicture, caption } = req.body;
+
+  try {
+    const newPost = new Post({
+      userId,
+      username,
+      profilePicture,
+      caption,
+      image: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
       }
+    });
+
+    await newPost.save();
+    res.status(201).json(newPost);
+  } catch (error) {
+    console.error("Error creating post:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
+// **exports.getAllPosts = async (req, res) => {
+//     try {
+//       let posts = await Post.find();
+      
+//       // Shuffle posts randomly (Fisher-Yates Algorithm)
+//       for (let i = posts.length - 1; i > 0; i--) {
+//         const j = Math.floor(Math.random() * (i + 1));
+//         [posts[i], posts[j]] = [posts[j], posts[i]];
+//       }
   
-      res.json(posts);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
+//       res.json(posts);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   };
+exports.getAllPosts = async (req, res) => {
+  try {
+    let posts = await Post.find();
+
+    // Shuffle posts randomly
+    for (let i = posts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [posts[i], posts[j]] = [posts[j], posts[i]];
     }
-  };
+
+    // Convert Buffer to base64
+    const postsWithBase64 = posts.map((post) => {
+      const imageBase64 = post.image?.data?.toString("base64");
+      const imageUrl = imageBase64
+        ? `data:${post.image.contentType};base64,${imageBase64}`
+        : null;
+
+      return {
+        ...post._doc,
+        imageUrl // this will be used in frontend <img [src]="post.imageUrl" />
+      };
+    });
+
+    res.json(postsWithBase64);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 // Get posts by a specific user

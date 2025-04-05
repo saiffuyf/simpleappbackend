@@ -8,6 +8,7 @@ require('dotenv').config();
 const app = express();
 
 // Middleware to parse JSON requests
+
 app.use(express.json());
 
 app.use(cors())
@@ -38,7 +39,7 @@ app.use(cors({
 
 // Connect to MongoDB
 connectDB();
-app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static('uploads'));
 
 // Use routes
 app.use('/api/users', userRoutes);
