@@ -9,12 +9,15 @@ const app = express();
 
 // Middleware to parse JSON requests
 app.use(express.json());
-// app.use(cors());
-app.use(cors({
-  origin: ['https://simpleapp-i551.onrender.com'], // Add your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+
+app.use(cors())
+
+// app.use(cors({
+//   origin: ['https://simpleapp-i551.onrender.com'], // Add your frontend URL
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true
+// }));
+
 
 // const allowedOrigins = [
 //   'http://localhost:4200',  // For local development
@@ -35,6 +38,7 @@ app.use(cors({
 
 // Connect to MongoDB
 connectDB();
+app.use('/uploads', express.static('uploads'));
 
 // Use routes
 app.use('/api/users', userRoutes);
