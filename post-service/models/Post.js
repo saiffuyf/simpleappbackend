@@ -4,8 +4,9 @@ const PostSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   username: { type: String},
   profilePicture: { type: String, default: "" },
-  imageUrl: { type: String, required: true },
+  imageUrl: { type: String},
   caption: { type: String, maxlength: 500 },
+  
   // likes: { type: Number, default: 0 },
   comments: [
     {
