@@ -10,7 +10,7 @@ const postRoutes = require("./routes/postRoutes");
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:4200',
+  origin: 'https://texus.onrender.com',
   credentials: true
 }));
 
