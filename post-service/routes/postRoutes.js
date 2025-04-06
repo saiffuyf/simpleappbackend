@@ -1,6 +1,7 @@
 const express = require("express");
 const { createPost,addComment, getAllPosts, getPostsByUser,likePost } = require("../controllers/postController");
 const multer = require("multer");
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 

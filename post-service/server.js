@@ -9,10 +9,16 @@ dotenv.config();
 const postRoutes = require("./routes/postRoutes");
 
 const app = express();
+app.use(cors({
+  origin: 'http://localhost:4200',
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+
+
+
 // app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded images
 // Routes
 app.use("/api/posts", postRoutes);

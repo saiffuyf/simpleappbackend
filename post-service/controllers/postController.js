@@ -147,16 +147,43 @@ exports.getAllPosts = async (req, res) => {
 
 
 // Get posts by a specific user
+// **exports.getPostsByUser = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const posts = await Post.find({ userId }).sort({ createdAt: -1 });
+//     res.json(posts);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
 exports.getPostsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const posts = await Post.find({ userId }).sort({ createdAt: -1 });
-    res.json(posts);
+
+    const postsWithImages = posts.map(post => {
+      const postObj = post.toObject(); // ✅ Convert Mongoose doc to plain JS object
+
+      if (postObj.image && postObj.image.data) {
+        postObj.imageUrl = `data:${postObj.image.contentType};base64,${Buffer.from(postObj.image.data).toString('base64')}`;
+      } else {
+        postObj.imageUrl = '';
+      }
+
+      return postObj;
+    });
+
+    res.json(postsWithImages);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 // exports.likePost = async (req, res) => {
 //     try {
