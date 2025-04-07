@@ -50,43 +50,6 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// User login (just for completeness)
-// exports.loginUser = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(400).json({ message: 'Invalid credentials' });
-//     }
-
-//     // Compare password with the stored hash
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(400).json({ message: 'Invalid credentials' });
-//     }
-
-//     const token = jwt.sign(
-//       { 
-//         userId: user._id, 
-//         username: user.username,
-//         profilePicture: user.profilePicture // Ensure this is available in the User model
-//       },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1h" }
-//     );
-    
-
-//     // Send response
-//     res.json({ token });
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
-
-
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -127,30 +90,6 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-
-
-// exports.getUsers = async (req, res) => {
-//   try {
-//     const { userIds } = req.body;
-//     if (!userIds || !Array.isArray(userIds)) {
-//       return res.status(400).json({ message: "Invalid user IDs" });
-//     }
-
-//     const users = await User.find({ _id: { $in: userIds } }).select("username profilePicture");
-    
-//     // Convert to an object with userId as key
-//     const userMap = {};
-//     users.forEach(user => {
-//       userMap[user._id] = { username: user.username, profilePicture: user.profilePicture };
-//     });
-
-//     res.json(userMap);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 exports.getUsers = async (req, res) => {
   try {

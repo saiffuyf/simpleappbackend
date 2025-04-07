@@ -13,17 +13,17 @@ app.use(express.json());
 
 app.use(cors())
 
-app.use(cors({
-  origin: ['https://texus.onrender.com'], // Add your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+// ***app.use(cors({
+//   origin: ['https://texus.onrender.com'], // Add your frontend URL
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true
+// }));
 
 
-// const allowedOrigins = [
-//   'http://localhost:4200',  // For local development
-//   'https://simpleapp-i551.onrender.com' // Your frontend on Render
-// ];
+const allowedOrigins = [
+  'http://localhost:4200',  // For local development
+  'https://simpleapp-i551.onrender.com' // Your frontend on Render
+];
 
 // app.use(cors({
 //   origin: function (origin, callback) {
