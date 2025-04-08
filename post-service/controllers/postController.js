@@ -23,43 +23,6 @@ const validatePost = [
   body("username").notEmpty().withMessage("Username is required"),
   body("caption").isLength({ max: 500 }).withMessage("Caption cannot exceed 500 characters"),
 ];
-
-// Create a new post
-// **exports.createPost = async (req, res) => {
-//     console.log("🔍 Received Request Body:", req.body);
-//     console.log("📸 Received File:", req.file);
-  
-//     // Validation check
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ errors: errors.array() });
-//     }
-  
-//     if (!req.file) {
-//       return res.status(400).json({ message: "Image file is required" });
-//     }
-  
-//     const { userId, username, profilePicture, caption } = req.body;
-//     // const imageUrl = `/uploads/${req.file.filename}`; // Store file path ***
-//     const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
-  
-//     try {
-//       const newPost = new Post({
-//         userId,
-//         username,
-//         profilePicture,
-//         imageUrl,
-//         caption
-//       });
-  
-//       await newPost.save();
-//       res.status(201).json(newPost);
-//     } catch (error) {
-//       console.error(" Error creating post:", error);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   };
  
 exports.createPost = async (req, res) => {
   console.log("🔍 Received Request Body:", req.body);
@@ -96,36 +59,31 @@ exports.createPost = async (req, res) => {
   }
 };
 
-
-
-
-// **exports.getAllPosts = async (req, res) => {
-//     try {
-//       let posts = await Post.find();
-      
-//       // Shuffle posts randomly (Fisher-Yates Algorithm)
-//       for (let i = posts.length - 1; i > 0; i--) {
-//         const j = Math.floor(Math.random() * (i + 1));
-//         [posts[i], posts[j]] = [posts[j], posts[i]];
-//       }
-  
-//       res.json(posts);
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   };
 exports.getAllPosts = async (req, res) => {
   try {
-    let posts = await Post.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    // Shuffle posts randomly
+    console.log("📨 Page:", page);
+    console.log("🔢 Limit:", limit);
+    console.log("⏩ Skip:", skip);
+
+    const totalPosts = await Post.countDocuments();
+
+    // Add this log to verify if skip/limit works
+    let posts = await Post.find()
+      .skip(skip)
+      .limit(limit);
+
+    console.log(" Posts fetched from DB:", posts.length);
+
+    // Shuffle posts
     for (let i = posts.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [posts[i], posts[j]] = [posts[j], posts[i]];
     }
 
-    // Convert Buffer to base64
     const postsWithBase64 = posts.map((post) => {
       const imageBase64 = post.image?.data?.toString("base64");
       const imageUrl = imageBase64
@@ -134,30 +92,20 @@ exports.getAllPosts = async (req, res) => {
 
       return {
         ...post._doc,
-        imageUrl // this will be used in frontend <img [src]="post.imageUrl" />
+        imageUrl,
       };
     });
 
-    res.json(postsWithBase64);
+    res.json({
+      posts: postsWithBase64,
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Backend error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
-// Get posts by a specific user
-// **exports.getPostsByUser = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const posts = await Post.find({ userId }).sort({ createdAt: -1 });
-//     res.json(posts);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
 
 exports.getPostsByUser = async (req, res) => {
   try {
@@ -165,7 +113,7 @@ exports.getPostsByUser = async (req, res) => {
     const posts = await Post.find({ userId }).sort({ createdAt: -1 });
 
     const postsWithImages = posts.map(post => {
-      const postObj = post.toObject(); // ✅ Convert Mongoose doc to plain JS object
+      const postObj = post.toObject(); //Convert Mongoose doc to plain JS object
 
       if (postObj.image && postObj.image.data) {
         postObj.imageUrl = `data:${postObj.image.contentType};base64,${Buffer.from(postObj.image.data).toString('base64')}`;
@@ -183,26 +131,6 @@ exports.getPostsByUser = async (req, res) => {
   }
 };
 
-
-
-// exports.likePost = async (req, res) => {
-//     try {
-//         const { id } = req.params; // Get post ID from URL
-//         const post = await Post.findById(id);
-
-//         if (!post) {
-//             return res.status(404).json({ message: "Post not found" });
-//         }
-
-//         post.likes += 1; // Increment likes
-//         await post.save(); // Save updated post
-
-//         res.json({ message: "Post liked!", likes: post.likes });
-//     } catch (error) {
-//         console.error("Error liking post:", error);
-//         res.status(500).json({ message: "Server error" });
-//     }
-// };
 exports.likePost = async (req, res) => {
     try {
       const { postId } = req.params;
@@ -224,7 +152,8 @@ exports.likePost = async (req, res) => {
       }
   
       await post.save();
-      res.json({ likes: post.likes.length, message: likedIndex === -1 ? "Liked" : "Unliked" });
+      res.json({ likes: post.likes, message: likedIndex === -1 ? "Liked" : "Unliked" });
+
     } catch (error) {
       console.error("Error liking/unliking post:", error);
       res.status(500).json({ message: "Server error" });
