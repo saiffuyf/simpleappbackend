@@ -7,38 +7,6 @@ mongoose.connection.once('open', () => {
   bucket = new GridFSBucket(mongoose.connection.db, { bucketName: 'reels' });
 });
 
-// Upload video to GridFS
-// ****exports.uploadReel = async (req, res) => {
-//     // const { userId } = req.body;
-//     const { userId, caption, tags } = req.body;
-
-//     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  
-//     const uploadStream = bucket.openUploadStream(`reel_${Date.now()}.mp4`, {
-//       contentType: req.file.mimetype,
-//     });
-  
-//     const fileId = uploadStream.id; // <-- capture manually
-  
-//     uploadStream.end(req.file.buffer);
-  
-//     uploadStream.on('finish', async () => {
-//       try {
-//         const newReel = new Reel({ userId, fileId });
-//         await newReel.save();
-//         res.status(201).json({ message: 'Reel uploaded successfully', reelId: newReel._id });
-//       } catch (err) {
-//         console.error('DB save error:', err);
-//         res.status(500).json({ error: 'Error saving reel to database' });
-//       }
-//     });
-  
-//     uploadStream.on('error', (err) => {
-//       console.error('Upload error:', err);
-//       res.status(500).json({ error: 'Upload failed' });
-//     });
-// };
-// Upload video to GridFS
 exports.uploadReel = async (req, res) => {
     const { userId, caption, tags } = req.body;
   
@@ -80,10 +48,30 @@ exports.uploadReel = async (req, res) => {
       
   
 // Random Reels
-exports.getRandomReels = async (req, res) => {
-  const reels = await Reel.aggregate([{ $sample: { size: 10 } }]);
-  res.json(reels);
+// exports.getRandomReels = async (req, res) => {
+//   const reels = await Reel.aggregate([{ $sample: { size: 10 } }]);
+//   res.json(reels);
+// };
+exports.getPaginatedReels = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 3;
+    const skip = (page - 1) * limit;
+
+    const total = await Reel.countDocuments();
+    const reels = await Reel.aggregate([
+      { $sample: { size: total } }, // Randomize first
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    res.json({ reels, hasMore: skip + limit < total });
+  } catch (err) {
+    console.error('Pagination error:', err);
+    res.status(500).json({ error: 'Failed to fetch reels' });
+  }
 };
+
 
 exports.getVideoStream = async (req, res) => {
     try {
