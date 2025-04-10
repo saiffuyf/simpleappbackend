@@ -16,7 +16,7 @@ const io = socketIo(server, {
   },
 });
 app.use(cors({
-  origin: 'https://texus.onrender.com',
+  origin: ['https://texus.onrender.com', 'http://localhost:4200'],
   credentials: true
 }));
 
