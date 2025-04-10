@@ -15,12 +15,12 @@ const io = socketIo(server, {
     origin: "*",
   },
 });
-// app.use(cors({
-//   origin: 'https://texus.onrender.com',
-//   credentials: true
-// }));
+app.use(cors({
+  origin: 'https://texus.onrender.com',
+  credentials: true
+}));
 
-app.use(cors())
+// app.use(cors())
 
 // Connect DB
 connectDB();
