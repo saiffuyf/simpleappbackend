@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser, getUsers } = require('../controllers/userController');
+const { registerUser, loginUser, getUsers,getAllUsersExcept } = require('../controllers/userController');
 const userValidation = require('../validations/userValidation');
 const User = require("../models/User");
 const router = express.Router();
@@ -15,6 +15,7 @@ const upload = multer({ storage });
 router.post('/register', userValidation, registerUser);
 router.post('/login', loginUser);
 router.post('/getUsers', getUsers);
+router.post('/getAllExceptMe', getAllUsersExcept);
 
 router.get("/:userID", async (req, res) => {
   try {
@@ -78,6 +79,7 @@ router.delete('/:userId/profile-picture', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 module.exports = router;

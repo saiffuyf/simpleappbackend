@@ -123,3 +123,23 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// Get all users except the current one
+exports.getAllUsersExcept = async (req, res) => {
+  try {
+    const { currentUserId } = req.body;
+
+    // Validate ID format
+    if (!currentUserId || !currentUserId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    // Get all users excluding the current user
+    const users = await User.find({ _id: { $ne: currentUserId } })
+      .select("_id username profilePicture");
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

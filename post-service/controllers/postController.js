@@ -2,7 +2,6 @@ const Post = require("../models/Post");
 const { validationResult, body } = require("express-validator");
 const multer = require("multer");
 const path = require("path");
-
 // Multer setup for file uploads
 // **const storage = multer.diskStorage({
 //   destination: "uploads/",

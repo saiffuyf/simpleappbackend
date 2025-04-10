@@ -13,7 +13,9 @@ const UserSchema = new mongoose.Schema({
   profilePicture: {
     data: Buffer,             // binary image data
     contentType: String       // e.g. 'image/png'
-  }
+  },
+  
 });
+
 
 module.exports = mongoose.model("User", UserSchema);

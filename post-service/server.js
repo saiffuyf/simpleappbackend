@@ -9,11 +9,11 @@ dotenv.config();
 const postRoutes = require("./routes/postRoutes");
 
 const app = express();
-// ***app.use(cors({
-//   origin: 'https://texus.onrender.com',
-//   credentials: true
-// }));
-app.use(cors())
+app.use(cors({
+  origin: 'https://texus.onrender.com',
+  credentials: true
+}));
+// app.use(cors())
 
 // Middleware
 app.use(express.json());
